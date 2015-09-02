@@ -1,6 +1,10 @@
 require 'readline'
 require 'date'
 
+# The earliest date for which ther eis consistent data.
+DATA_START_DATE = '2006-09-20'
+
+# We want to be kin to the remote server. This
 # Ask the user (via the command line) to provide valid start date and end date.
 def query_user_for_date_range
 	start_date = nil
@@ -19,7 +23,7 @@ end
 def query_user_for_date
 	date = nil
 	until date.is_a? Date
-		prompt = "Please enter a date as YYYY-MM-DD"
+		prompt = "Please enter a date as YYYY-MM-DD: "
 		response = Readline.readline(prompt, true)
 
 		# We have the option to quit any time.
