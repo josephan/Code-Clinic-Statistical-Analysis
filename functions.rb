@@ -64,7 +64,7 @@ end
 
 # Test if a single date is valid
 def date_valid?(date)
-	valid_dates = Date.parse(DATA_START_DATE)..Date.today
+	valid_dates = Date.parse(DATA_START_DATE)..Date.new(2015, 9, 3)
 	if valid_dates.cover?(date)
 		return true
 	else
@@ -106,4 +106,6 @@ def get_readings_from_remote(type, date)
 	data = open(url).readlines
 	# Extract the reading from each line
 	readings = data.map do |line|
+		line.delete if line 
+	end
 end
