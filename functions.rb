@@ -109,3 +109,84 @@ def get_readings_from_remote(type, date)
 		line.delete if line 
 	end
 end
+
+### Data Calculations ###
+
+# Calculates the mean (average) of an array of number.
+def mean(array)
+	total = array.inject(0) { |sum, x| sum += x }
+	# Use to_f or you willl get an integer result
+	return total.to_f / array.length
+end
+
+# Calculates the median (middle) of an array of numbers.
+def median(array)
+	array.sort!
+	length = array.length
+	if length % 2 == 1
+		# odd length, return the middle number
+		return array[length/2]
+	else
+		# even length, average the two middle numbers
+		item1 = array[length/2 - 1]
+		item2 = array[length/2]
+		return mean([item1, item2])
+	end
+end
+
+# Given a start date and end date, will go through all supported
+# READING_TYPES, retrieve values from the remote server,
+# and calculate the mean and average of the values.
+# Results are returned as a Hash.
+def retrieve_and_calculate_results(start_date, end_date)
+	results = {}
+	READING_TYPES.each do |type, label|
+		readings = get_readings_from_remote_for_dates(type, start_date, end_date)
+		results[label] = {
+			:mean => mean(readings),
+			:median => median(readings)
+		}
+	end
+	return results
+end
+
+### Output ###
+
+# Output the results hash formatteed as a table of data
+# to the console.
+def output_results_table(results={})
+	puts
+	puts "+------------+------------+------------+"
+	puts "| Type       | Mean       | Median     |"
+	puts "+------------+------------+------------+"
+	results.each do |label, hash|
+		print "| " + label.ljust(10) + " | "
+		print sprintf("%.6f", hash[:mean]).rjust(10) + " | "
+		puts sprintf("%.6f", hash[:median]).rjust(10) + " |"
+	end
+	puts "----------------------------------------"
+	puts
+end
+
+### API methods ###
+
+# Use the URL parameters for finding valid start and end dates.
+def url_params_for_date_range
+	begin
+		start_date = Date.parse(params[:start])
+		end_date = Date.parse(params[:end])
+	rescue ArgumentError
+		halt "Invalid date format."
+	end
+
+	# call our validations
+	if !date_valid?(start_date)
+		halt "Start date must be after #{DATA_START_DATE} and before today."
+	elsif !date_valid?(end_date)
+		halt "End date must be after #{DATA_START_DATE} and before today."
+	elsif !date_range_valid?(start_date, end_date)
+		halt "Invalid date range."
+	end
+			
+	return start_date, end_date
+end
